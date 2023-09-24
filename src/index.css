@@ -113,6 +113,7 @@ progress {
 ::-webkit-progress-value {
   background-color: var(--color-theme);
   border-radius: 100px;
+  transition: all 0.35s;
 }
 
 .btn {
@@ -160,6 +161,7 @@ progress {
   background-color: var(--color-theme);
   border: 2px solid var(--color-theme);
   color: var(--color-light);
+  transform: translateX(2rem);
 }
 .btn-option.wrong {
   background-color: var(--color-accent);
@@ -168,7 +170,7 @@ progress {
 }
 
 .answer {
-  transform: translateX(2rem);
+  transform: translateX(1.2rem);
 }
 
 .answer.wrong {
