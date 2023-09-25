@@ -5,12 +5,16 @@ import Error from "./components/UI/Error";
 
 import Header from "./components/Layout/Header";
 import Main from "./components/Layout/Main";
+import Footer from "./components/Layout/Footer";
 
 import StartScreen from "./components/UI/StartScreen";
 import Question from "./components/Question/Question";
+import Timer from "./components/UI/Timer";
 import NextButton from "./components/UI/NextButton";
 import Progress from "./components/UI/Progress";
 import FinishScreen from "./components/UI/FinishScreen";
+
+const SECS_PER_QUESTION = 30;
 
 const initialState = {
   questions: [],
@@ -19,6 +23,7 @@ const initialState = {
   index: 0,
   answer: null,
   points: 0,
+  secondsRemaining: null,
   highScore: Number(localStorage.getItem("highScore").replace(/["\\]/g, "")),
 };
 
@@ -41,6 +46,7 @@ function reducer(state, action) {
       return {
         ...state,
         status: "active",
+        secondsRemaining: state.questions.length * SECS_PER_QUESTION,
       };
 
     case "newAnswer":
@@ -73,18 +79,31 @@ function reducer(state, action) {
         status: "ready",
       };
 
+    case "tick": {
+      return {
+        ...state,
+        secondsRemaining: state.secondsRemaining - 1,
+        status: state.secondsRemaining === 0 ? "finished" : state.status,
+        highscore:
+          state.secondsRemaining === 0
+            ? Math.max(state.points, state.highscore)
+            : state.highscore,
+      };
+    }
+
     default:
       throw new Error("Action unknown");
   }
 }
 
 export default function App() {
-  const [{ questions, status, index, answer, points, highScore }, dispatch] =
-    useReducer(reducer, initialState);
+  const [
+    { questions, status, index, answer, points, highScore, secondsRemaining },
+    dispatch,
+  ] = useReducer(reducer, initialState);
 
   const numQuestions = questions.length;
   const maxPoints = questions.reduce((prev, cur) => prev + cur.points, 0);
-  console.log(maxPoints);
 
   useEffect(() => {
     fetch("http://localhost:8000/questions")
@@ -119,12 +138,16 @@ export default function App() {
               question={questions[index]}
               answer={answer}
             />
-            <NextButton
-              index={index}
-              numQuestions={numQuestions}
-              dispatch={dispatch}
-              answer={answer}
-            />
+
+            <Footer>
+              <Timer dispatch={dispatch} secondsRemaining={secondsRemaining} />
+              <NextButton
+                index={index}
+                numQuestions={numQuestions}
+                dispatch={dispatch}
+                answer={answer}
+              />
+            </Footer>
           </>
         )}
 
